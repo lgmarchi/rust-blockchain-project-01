@@ -1,0 +1,15 @@
+max_width = 80
+hard_tabs = false
+tab_spaces = 4
+newline_style = "Unix"
+style_edition = "2024"
+use_small_heuristics = "Max"
+merge_derives = false
+# Those 2 optios are stable yet
+group_imports = "StdExternalCrate"
+imports_granularity = "Crate"
+use_field_init_shorthand = true
+imports_layout = "Vertical"
+wrap_comments = true
+comment_width = 100
+format_code_in_doc_comments = true
