@@ -41,7 +41,8 @@ impl Pallet {
     }
 
     fn get_nonce(&self, who: &String) -> u32 {
-        let nonce = self.nonce.get(who).unwrap_or(&0);
+        let default_nonce = 0;
+        let nonce = self.nonce.get(who).unwrap_or(&default_nonce);
         *nonce
     }
 }
