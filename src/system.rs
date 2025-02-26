@@ -39,6 +39,11 @@ impl Pallet {
         // Short version
         *self.nonce.entry(who.to_string()).or_insert(0) += 1;
     }
+
+    fn get_nonce(&self, who: &String) -> u32 {
+        let nonce = self.nonce.get(who).unwrap_or(&0);
+        *nonce
+    }
 }
 
 #[cfg(test)]
@@ -54,5 +59,13 @@ mod test {
         let mut system = super::Pallet::new();
         system.increase_block_number();
         assert_eq!(system.block_number(), 1);
+    }
+
+    #[test]
+    fn increase_nonce() {
+        let mut system = super::Pallet::new();
+        let alice = &String::from("Alice");
+        system.increase_nonce(alice);
+        assert_eq!(system.get_nonce(alice), 1);
     }
 }
