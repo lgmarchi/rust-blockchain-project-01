@@ -47,13 +47,33 @@ impl Pallet {
 
 #[cfg(test)]
 mod tests {
+    const ALICE_BALANCE: &str = "Alice";
+    const BOB_BALANCE: &str = "Bob";
+
     #[test]
     fn init_balances() {
         let mut balances = super::Pallet::new();
 
-        assert_eq!(balances.get_balance(&"Alice".to_string()), 0);
-        balances.set_balance(&"Alice".to_string(), 100);
-        assert_eq!(balances.get_balance(&"Alice".to_string()), 100);
-        assert_eq!(balances.get_balance(&"Bob".to_string()), 0);
+        assert_eq!(balances.get_balance(&ALICE_BALANCE.to_string()), 0);
+        balances.set_balance(&ALICE_BALANCE.to_string(), 100);
+        assert_eq!(balances.get_balance(&ALICE_BALANCE.to_string()), 100);
+        assert_eq!(balances.get_balance(&BOB_BALANCE.to_string()), 0);
+    }
+
+    #[test]
+    fn transfer_balance() {
+        let mut balances = super::Pallet::new();
+
+        balances.set_balance(&ALICE_BALANCE.to_string(), 100);
+        balances.set_balance(&BOB_BALANCE.to_string(), 20);
+
+        let _ = balances.transfer(
+            ALICE_BALANCE.to_string(),
+            BOB_BALANCE.to_string(),
+            80,
+        );
+
+        assert_eq!(balances.get_balance(&ALICE_BALANCE.to_string()), 20);
+        assert_eq!(balances.get_balance(&BOB_BALANCE.to_string()), 100);
     }
 }
