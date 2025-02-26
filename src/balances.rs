@@ -14,9 +14,34 @@ impl Pallet {
         self.balances.insert(who.clone(), amount);
     }
 
-    pub fn get_balance(&mut self, who: &String) -> u128 {
+    pub fn get_balance(&self, who: &String) -> u128 {
         let balance = self.clone().balances.get(who).map(|f| *f).unwrap_or(0);
         balance
+    }
+
+    /// Transfer `amount` from one account to another
+    /// This function verifies that `from` has at least `amount` balance to
+    /// transfer and that no mathematical overflows occur.
+    pub fn transfer(
+        &mut self,
+        caller: String,
+        to: String,
+        amount: u128,
+    ) -> Result<(), &'static str> {
+        let caller_balance = self.get_balance(&caller);
+        let to_ballance = self.get_balance(&to);
+
+        let new_caller_balance =
+            caller_balance.checked_sub(amount).ok_or("Insufficient balance")?;
+
+        let new_to_ballance = to_ballance
+            .checked_add(amount)
+            .ok_or("Overflow when adding to balance")?;
+
+        self.set_balance(&caller, new_caller_balance);
+        self.set_balance(&to, new_to_ballance);
+
+        Ok(())
     }
 }
 
