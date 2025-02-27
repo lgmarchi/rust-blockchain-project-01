@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 const ERR_INSUFFICIENT_BALANCE: &str = "Insufficient balance";
 const ERR_OVERFLOW_BALANCE: &str = "Overflow when adding to balance";
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Pallet {
     balances: BTreeMap<String, u128>,
 }
