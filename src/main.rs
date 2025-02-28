@@ -1,4 +1,5 @@
 mod balances;
+mod error_messages;
 mod system;
 
 #[derive(Debug)]

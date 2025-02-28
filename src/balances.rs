@@ -1,7 +1,6 @@
 use std::collections::BTreeMap;
 
-const ERR_INSUFFICIENT_BALANCE: &str = "Insufficient balance";
-const ERR_OVERFLOW_BALANCE: &str = "Overflow when adding to balance";
+use crate::error_messages::*;
 
 #[derive(Clone, Debug)]
 pub struct Pallet {
