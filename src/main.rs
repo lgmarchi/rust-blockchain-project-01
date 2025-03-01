@@ -1,4 +1,11 @@
-use utils::*;
+use balances::BalancesConfig;
+use system::Config;
+use utils::{
+    AccountId,
+    Balance,
+    BlockNumber,
+    Nonce,
+};
 
 mod balances;
 mod error_messages;
@@ -7,8 +14,19 @@ mod utils;
 
 #[derive(Debug)]
 pub struct Runtime {
-    system: system::Pallet<AccountId, BlockNumber, Nonce>,
-    balances: balances::Pallet<AccountId, Balance>,
+    system: system::Pallet<Runtime>,
+    balances: balances::Pallet<Runtime>,
+}
+
+impl Config for Runtime {
+    type AccountId = AccountId;
+    type BlockNumber = BlockNumber;
+    type Nonce = Nonce;
+}
+
+impl BalancesConfig for Runtime {
+    type AccountId = AccountId;
+    type Balance = Balance;
 }
 
 impl Runtime {
