@@ -7,7 +7,7 @@ mod utils;
 
 #[derive(Debug)]
 pub struct Runtime {
-    system: system::Pallet,
+    system: system::Pallet<AccountId, BlockNumber, Nonce>,
     balances: balances::Pallet<AccountId, Balance>,
 }
 
@@ -47,6 +47,8 @@ fn main() {
         .map_err(|e| println!("Error: {:?}", e));
 
     println!("{:#?}", runtime);
+
+    let _ = runtime.system.get_nonce(&alice);
 
     // let mut balance = balances::Pallet::new();
     // let mut system = system::Pallet::new();
