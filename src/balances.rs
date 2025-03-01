@@ -1,16 +1,23 @@
 use std::collections::BTreeMap;
 
-use crate::{
-    error_messages::*,
-    utils::*,
+use num::{
+    CheckedAdd,
+    CheckedSub,
+    Zero,
 };
 
+use crate::error_messages::*;
+
 #[derive(Clone, Debug)]
-pub struct Pallet {
+pub struct Pallet<AccountId, Balance> {
     balances: BTreeMap<AccountId, Balance>,
 }
 
-impl Pallet {
+impl<AccountId, Balance> Pallet<AccountId, Balance>
+where
+    AccountId: Ord + Clone,
+    Balance: Zero + CheckedSub + CheckedAdd + Copy,
+{
     pub fn new() -> Self {
         Self { balances: BTreeMap::new() }
     }
@@ -19,8 +26,13 @@ impl Pallet {
         self.balances.insert(who.clone(), amount);
     }
 
-    pub fn get_balance(&self, who: &AccountId) -> u128 {
-        let balance = self.clone().balances.get(who).map(|f| *f).unwrap_or(0);
+    pub fn get_balance(&self, who: &AccountId) -> Balance {
+        let balance = self
+            .clone()
+            .balances
+            .get(who)
+            .map(|f| *f)
+            .unwrap_or(Balance::zero());
         balance
     }
 
@@ -37,11 +49,11 @@ impl Pallet {
         let to_ballance = self.get_balance(&to);
 
         let new_caller_balance = caller_balance
-            .checked_sub(amount)
+            .checked_sub(&amount)
             .ok_or(ERR_INSUFFICIENT_BALANCE)?;
 
         let new_to_ballance =
-            to_ballance.checked_add(amount).ok_or(ERR_OVERFLOW_BALANCE)?;
+            to_ballance.checked_add(&amount).ok_or(ERR_OVERFLOW_BALANCE)?;
 
         self.set_balance(&caller, new_caller_balance);
         self.set_balance(&to, new_to_ballance);

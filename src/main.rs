@@ -1,3 +1,5 @@
+use utils::*;
+
 mod balances;
 mod error_messages;
 mod system;
@@ -6,7 +8,7 @@ mod utils;
 #[derive(Debug)]
 pub struct Runtime {
     system: system::Pallet,
-    balances: balances::Pallet,
+    balances: balances::Pallet<AccountId, Balance>,
 }
 
 impl Runtime {
