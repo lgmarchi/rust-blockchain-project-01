@@ -1,10 +1,13 @@
 use std::collections::BTreeMap;
 
-use crate::error_messages::*;
+use crate::{
+    error_messages::*,
+    utils::*,
+};
 
 #[derive(Clone, Debug)]
 pub struct Pallet {
-    balances: BTreeMap<String, u128>,
+    balances: BTreeMap<AccountId, Balance>,
 }
 
 impl Pallet {
@@ -12,11 +15,11 @@ impl Pallet {
         Self { balances: BTreeMap::new() }
     }
 
-    pub fn set_balance(&mut self, who: &String, amount: u128) {
+    pub fn set_balance(&mut self, who: &AccountId, amount: Balance) {
         self.balances.insert(who.clone(), amount);
     }
 
-    pub fn get_balance(&self, who: &String) -> u128 {
+    pub fn get_balance(&self, who: &AccountId) -> u128 {
         let balance = self.clone().balances.get(who).map(|f| *f).unwrap_or(0);
         balance
     }
@@ -26,9 +29,9 @@ impl Pallet {
     /// transfer and that no mathematical overflows occur.
     pub fn transfer(
         &mut self,
-        caller: String,
-        to: String,
-        amount: u128,
+        caller: AccountId,
+        to: AccountId,
+        amount: Balance,
     ) -> Result<(), &'static str> {
         let caller_balance = self.get_balance(&caller);
         let to_ballance = self.get_balance(&to);
@@ -49,7 +52,7 @@ impl Pallet {
 
 #[cfg(test)]
 mod tests {
-    use std::u128;
+    use crate::utils::Balance;
 
     const ALICE_BALANCE: &str = "Alice";
     const BOB_BALANCE: &str = "Bob";
@@ -86,7 +89,7 @@ mod tests {
         let mut balances = super::Pallet::new();
 
         balances.set_balance(&ALICE_BALANCE.to_string(), 100);
-        balances.set_balance(&BOB_BALANCE.to_string(), u128::MAX);
+        balances.set_balance(&BOB_BALANCE.to_string(), Balance::MAX);
 
         let transfer_result = balances.transfer(
             ALICE_BALANCE.to_string(),
@@ -96,7 +99,10 @@ mod tests {
 
         assert_eq!(transfer_result, Err(super::ERR_OVERFLOW_BALANCE));
         assert_eq!(balances.get_balance(&ALICE_BALANCE.to_string()), 100);
-        assert_eq!(balances.get_balance(&BOB_BALANCE.to_string()), u128::MAX);
+        assert_eq!(
+            balances.get_balance(&BOB_BALANCE.to_string()),
+            Balance::MAX
+        );
     }
 
     #[test]

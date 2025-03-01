@@ -3,10 +3,12 @@ use std::{
     ops::Add,
 };
 
+use crate::utils::*;
+
 #[derive(Debug)]
 pub struct Pallet {
-    block_number: u32,
-    nonce: BTreeMap<String, u32>,
+    block_number: BlockNumber,
+    nonce: BTreeMap<AccountId, Nonce>,
 }
 
 impl Pallet {
@@ -14,7 +16,7 @@ impl Pallet {
         Self { block_number: 0, nonce: BTreeMap::new() }
     }
 
-    pub fn block_number(&self) -> u32 {
+    pub fn block_number(&self) -> BlockNumber {
         self.block_number
     }
 
@@ -28,7 +30,7 @@ impl Pallet {
 
     // Increment the nonce of an account. This helps us keep track of how many
     // transactions account has made.
-    pub fn increase_nonce(&mut self, who: &String) {
+    pub fn increase_nonce(&mut self, who: &AccountId) {
         // let account = self.nonce.get_mut(who);
         // if let Some(nonce_number) = account {
         //     *nonce_number += 1;
@@ -41,7 +43,7 @@ impl Pallet {
         *self.nonce.entry(who.to_string()).or_insert(0) += 1;
     }
 
-    fn get_nonce(&self, who: &String) -> u32 {
+    fn get_nonce(&self, who: &AccountId) -> Nonce {
         let default_nonce = 0;
         let nonce = self.nonce.get(who).unwrap_or(&default_nonce);
         *nonce
