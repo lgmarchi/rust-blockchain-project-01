@@ -9,12 +9,10 @@ use num::{
     Zero,
 };
 
-use crate::error_messages::*;
-
-pub trait BalancesConfig {
-    type AccountId: Ord + Clone + Debug;
-    type Balance: Zero + CheckedSub + CheckedAdd + Copy + Debug;
-}
+use crate::{
+    error_messages::*,
+    utils::BalancesConfig,
+};
 
 #[derive(Clone, Debug)]
 pub struct Pallet<T: BalancesConfig> {
@@ -71,7 +69,10 @@ mod tests {
     use super::BalancesConfig;
     use crate::{
         balances::Pallet,
-        utils::Balance,
+        utils::{
+            AccountIdentifier,
+            Balance,
+        },
     };
 
     const ALICE_BALANCE: &str = "Alice";
@@ -79,8 +80,11 @@ mod tests {
 
     struct TestConfig;
 
-    impl BalancesConfig for TestConfig {
+    impl AccountIdentifier for TestConfig {
         type AccountId = String;
+    }
+
+    impl BalancesConfig for TestConfig {
         type Balance = u128;
     }
 

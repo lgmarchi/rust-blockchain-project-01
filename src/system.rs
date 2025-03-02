@@ -9,19 +9,15 @@ use num::{
     Zero,
 };
 
-pub trait Config {
-    type AccountId: Ord + Clone + Debug;
-    type BlockNumber: Ord + One + Clone + Copy + Zero + CheckedAdd + Debug;
-    type Nonce: Ord + Clone + Copy + One + Zero + std::ops::AddAssign + Debug;
-}
+use crate::utils::SystemConfig;
 
 #[derive(Debug)]
-pub struct Pallet<T: Config> {
+pub struct Pallet<T: SystemConfig> {
     block_number: T::BlockNumber,
     nonce: BTreeMap<T::AccountId, T::Nonce>,
 }
 
-impl<T: Config> Pallet<T> {
+impl<T: SystemConfig> Pallet<T> {
     pub fn new() -> Self {
         Self { block_number: T::BlockNumber::zero(), nonce: BTreeMap::new() }
     }
@@ -63,15 +59,21 @@ impl<T: Config> Pallet<T> {
 
 #[cfg(test)]
 mod test {
-    use crate::system::{
-        Config,
-        Pallet,
+    use crate::{
+        system::Pallet,
+        utils::{
+            AccountIdentifier,
+            SystemConfig,
+        },
     };
 
     struct TestConfig;
 
-    impl Config for TestConfig {
+    impl AccountIdentifier for TestConfig {
         type AccountId = String;
+    }
+
+    impl SystemConfig for TestConfig {
         type BlockNumber = u32;
         type Nonce = u32;
     }

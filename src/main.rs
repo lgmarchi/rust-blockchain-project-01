@@ -1,10 +1,11 @@
-use balances::BalancesConfig;
-use system::Config;
 use utils::{
     AccountId,
+    AccountIdentifier,
     Balance,
+    BalancesConfig,
     BlockNumber,
     Nonce,
+    SystemConfig,
 };
 
 mod balances;
@@ -18,14 +19,16 @@ pub struct Runtime {
     balances: balances::Pallet<Runtime>,
 }
 
-impl Config for Runtime {
+impl AccountIdentifier for Runtime {
     type AccountId = AccountId;
+}
+
+impl SystemConfig for Runtime {
     type BlockNumber = BlockNumber;
     type Nonce = Nonce;
 }
 
 impl BalancesConfig for Runtime {
-    type AccountId = AccountId;
     type Balance = Balance;
 }
 
