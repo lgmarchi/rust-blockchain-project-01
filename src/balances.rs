@@ -29,12 +29,8 @@ impl<T: BalancesConfig> Pallet<T> {
     }
 
     pub fn get_balance(&self, who: &T::AccountId) -> T::Balance {
-        let balance = self
-            .clone()
-            .balances
-            .get(who)
-            .map(|f| *f)
-            .unwrap_or(T::Balance::zero());
+        let balance =
+            self.balances.get(who).map(|f| *f).unwrap_or(T::Balance::zero());
         balance
     }
 
