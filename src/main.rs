@@ -1,10 +1,35 @@
+use utils::{
+    AccountId,
+    AccountIdentifier,
+    Balance,
+    BalancesConfig,
+    BlockNumber,
+    Nonce,
+    SystemConfig,
+};
+
 mod balances;
+mod error_messages;
 mod system;
+mod utils;
 
 #[derive(Debug)]
 pub struct Runtime {
-    system: system::Pallet,
-    balances: balances::Pallet,
+    system: system::Pallet<Runtime>,
+    balances: balances::Pallet<Runtime>,
+}
+
+impl AccountIdentifier for Runtime {
+    type AccountId = AccountId;
+}
+
+impl SystemConfig for Runtime {
+    type BlockNumber = BlockNumber;
+    type Nonce = Nonce;
+}
+
+impl BalancesConfig for Runtime {
+    type Balance = Balance;
 }
 
 impl Runtime {
@@ -43,6 +68,8 @@ fn main() {
         .map_err(|e| println!("Error: {:?}", e));
 
     println!("{:#?}", runtime);
+
+    let _ = runtime.system.get_nonce(&alice);
 
     // let mut balance = balances::Pallet::new();
     // let mut system = system::Pallet::new();
