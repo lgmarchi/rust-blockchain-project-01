@@ -18,6 +18,7 @@ use utils::{
 
 mod balances;
 mod error_messages;
+mod support;
 mod system;
 mod utils;
 
