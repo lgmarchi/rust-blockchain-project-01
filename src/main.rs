@@ -1,3 +1,11 @@
+#![warn(
+    // clippy::all,
+    // clippy::restriction,
+    clippy::pedantic,
+    clippy::nursery,
+    clippy::cargo
+)]
+
 use utils::{
     AccountId,
     AccountIdentifier,
@@ -57,17 +65,17 @@ fn main() {
 
     let _ = runtime
         .balances
-        .transfer(alice.clone(), bob.clone(), 30)
-        .map_err(|e| println!("Error: {:?}", e));
+        .transfer(alice.clone(), bob, 30)
+        .map_err(|e| println!("Error: {e:?}"));
 
     runtime.system.increase_nonce(&alice);
 
     let _ = runtime
         .balances
-        .transfer(alice.clone(), charlie.clone(), 20)
-        .map_err(|e| println!("Error: {:?}", e));
+        .transfer(alice.clone(), charlie, 20)
+        .map_err(|e| println!("Error: {e:?}"));
 
-    println!("{:#?}", runtime);
+    println!("{runtime:#?}");
 
     let _ = runtime.system.get_nonce(&alice);
 
