@@ -6,13 +6,16 @@
     clippy::cargo
 )]
 
+use support::Dispatch;
 use utils::{
     AccountId,
     AccountIdentifier,
     Balance,
     BalancesConfig,
+    Block,
     BlockNumber,
     Nonce,
+    RuntimeCall,
     SystemConfig,
 };
 
@@ -47,6 +50,35 @@ impl Runtime {
             system: system::Pallet::new(),
             balances: balances::Pallet::new(),
         }
+    }
+
+    fn execute_block(&mut self, block: Block) -> support::DispatchResult {
+        if (self.system.block_number() != block.header.block_number) {
+            return Err("Block number mismatch");
+        }
+
+        for (i, support::Extrinsic { caller, call }) in
+            block.extrinsics.into_iter().enumerate()
+        {
+            self.system.increase_nonce(&caller);
+            let _ = self.dispatch(caller, call).map_err(|e| {
+                eprintln!("Extrinsic Error\n\tBlock Number: {}\n\tExtrinsic Number: {}\n\tError: {}", block.header.block_number, i, e)
+            });
+        }
+        Ok(())
+    }
+}
+
+impl crate::support::Dispatch for Runtime {
+    type Caller = <Runtime as AccountIdentifier>::AccountId;
+    type Call = RuntimeCall;
+
+    fn dispatch(
+        &mut self,
+        caller: Self::Caller,
+        runtime_call: Self::Call,
+    ) -> support::DispatchResult {
+        unimplemented!()
     }
 }
 
