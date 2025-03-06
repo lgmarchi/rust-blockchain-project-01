@@ -12,7 +12,6 @@ use utils::{
     AccountIdentifier,
     Balance,
     BalancesConfig,
-    Block,
     BlockNumber,
     Nonce,
     RuntimeCall,
@@ -52,7 +51,12 @@ impl Runtime {
         }
     }
 
-    fn execute_block(&mut self, block: Block) -> support::DispatchResult {
+    fn execute_block(
+        &mut self,
+        block: utils::Block,
+    ) -> support::DispatchResult {
+        self.system.increase_block_number();
+
         if self.system.block_number() != block.header.block_number {
             return Err("Block number mismatch");
         }
@@ -90,33 +94,47 @@ impl crate::support::Dispatch for Runtime {
 fn main() {
     let mut runtime = Runtime::new();
     let alice = "alice".to_string();
-    let bob = "bob".to_string();
+    let bob: String = "bob".to_string();
     let charlie = "charlie".to_string();
 
     runtime.balances.set_balance(&alice, 100);
 
-    runtime.system.increase_block_number();
+    let block_1 = support::Block {
+        header: support::Header { block_number: 1 },
+        extrinsics: vec![
+            support::Extrinsic {
+                caller: alice.clone(),
+                call: RuntimeCall::BalancesTranfer {
+                    to: bob.clone(),
+                    amount: 30,
+                },
+            },
+            support::Extrinsic {
+                caller: alice.clone(),
+                call: RuntimeCall::BalancesTranfer {
+                    to: charlie.clone(),
+                    amount: 20,
+                },
+            },
+        ],
+    };
 
-    assert_eq!(runtime.system.block_number(), 1);
+    let block_2 = support::Block {
+        header: support::Header { block_number: 2 },
+        extrinsics: vec![
+            support::Extrinsic {
+                caller: alice.clone(),
+                call: RuntimeCall::BalancesTranfer { to: bob, amount: 30 },
+            },
+            support::Extrinsic {
+                caller: alice,
+                call: RuntimeCall::BalancesTranfer { to: charlie, amount: 20 },
+            },
+        ],
+    };
 
-    runtime.system.increase_nonce(&alice);
-
-    let _ = runtime
-        .balances
-        .transfer(alice.clone(), bob, 30)
-        .map_err(|e| println!("Error: {e:?}"));
-
-    runtime.system.increase_nonce(&alice);
-
-    let _ = runtime
-        .balances
-        .transfer(alice.clone(), charlie, 20)
-        .map_err(|e| println!("Error: {e:?}"));
+    runtime.execute_block(block_1).expect("Wrong block execution!");
+    runtime.execute_block(block_2).expect("Wrong block execution!");
 
     println!("{runtime:#?}");
-
-    let _ = runtime.system.get_nonce(&alice);
-
-    // let mut balance = balances::Pallet::new();
-    // let mut system = system::Pallet::new();
 }
