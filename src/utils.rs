@@ -7,7 +7,11 @@ use num::{
     Zero,
 };
 
-use crate::support;
+use crate::{
+    Runtime,
+    balances,
+    support,
+};
 
 pub type AccountId = String;
 pub type BlockNumber = u32;
@@ -18,7 +22,7 @@ pub type Header = support::Header<BlockNumber>;
 pub type Block = support::Block<Header, Extrinsic>;
 
 pub enum RuntimeCall {
-    BalancesTranfer { to: AccountId, amount: Balance },
+    Balances(balances::Call<Runtime>),
 }
 
 pub trait AccountIdentifier {
