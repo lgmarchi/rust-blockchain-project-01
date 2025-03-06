@@ -11,6 +11,7 @@ use num::{
 
 use crate::{
     error_messages::*,
+    support,
     utils::BalancesConfig,
 };
 
@@ -92,6 +93,28 @@ impl<T: BalancesConfig> Pallet<T> {
         self.set_balance(&caller, new_caller_balance);
         self.set_balance(&to, new_to_ballance);
 
+        Ok(())
+    }
+}
+
+pub enum Call<T: BalancesConfig> {
+    Transfer { to: T::AccountId, amount: T::Balance },
+}
+
+impl<T: BalancesConfig> crate::support::Dispatch for Pallet<T> {
+    type Caller = T::AccountId;
+    type Call = Call<T>;
+
+    fn dispatch(
+        &mut self,
+        caller: Self::Caller,
+        call: Self::Call,
+    ) -> support::DispatchResult {
+        match call {
+            Call::Transfer { to, amount } => {
+                self.transfer(caller, to, amount)?;
+            }
+        }
         Ok(())
     }
 }
