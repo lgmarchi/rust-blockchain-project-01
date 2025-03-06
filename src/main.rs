@@ -53,7 +53,7 @@ impl Runtime {
     }
 
     fn execute_block(&mut self, block: Block) -> support::DispatchResult {
-        if (self.system.block_number() != block.header.block_number) {
+        if self.system.block_number() != block.header.block_number {
             return Err("Block number mismatch");
         }
 
@@ -62,7 +62,7 @@ impl Runtime {
         {
             self.system.increase_nonce(&caller);
             let _ = self.dispatch(caller, call).map_err(|e| {
-                eprintln!("Extrinsic Error\n\tBlock Number: {}\n\tExtrinsic Number: {}\n\tError: {}", block.header.block_number, i, e)
+                eprintln!("Extrinsic Error\n\tBlock Number: {}\n\tExtrinsic Number: {}\n\tError: {}", block.header.block_number, i, e);
             });
         }
         Ok(())
@@ -70,7 +70,7 @@ impl Runtime {
 }
 
 impl crate::support::Dispatch for Runtime {
-    type Caller = <Runtime as AccountIdentifier>::AccountId;
+    type Caller = <Self as AccountIdentifier>::AccountId;
     type Call = RuntimeCall;
 
     fn dispatch(
@@ -78,7 +78,12 @@ impl crate::support::Dispatch for Runtime {
         caller: Self::Caller,
         runtime_call: Self::Call,
     ) -> support::DispatchResult {
-        unimplemented!()
+        match runtime_call {
+            RuntimeCall::BalancesTranfer { to, amount } => {
+                self.balances.transfer(caller, to, amount)?;
+            }
+        }
+        Ok(())
     }
 }
 

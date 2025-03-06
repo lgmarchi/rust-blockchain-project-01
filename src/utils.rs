@@ -17,7 +17,9 @@ pub type Extrinsic = support::Extrinsic<AccountId, RuntimeCall>;
 pub type Header = support::Header<BlockNumber>;
 pub type Block = support::Block<Header, Extrinsic>;
 
-pub enum RuntimeCall {}
+pub enum RuntimeCall {
+    BalancesTranfer { to: AccountId, amount: Balance },
+}
 
 pub trait AccountIdentifier {
     type AccountId: Ord + Clone + Debug;
