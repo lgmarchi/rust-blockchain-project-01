@@ -19,6 +19,7 @@ use utils::{
 };
 
 mod balances;
+mod declarative_marcros;
 mod error_messages;
 mod support;
 mod system;
@@ -93,9 +94,9 @@ impl crate::support::Dispatch for Runtime {
 
 fn main() {
     let mut runtime = Runtime::new();
-    let alice = "alice".to_string();
-    let bob: String = "bob".to_string();
-    let charlie = "charlie".to_string();
+    let alice: String = String!("alice");
+    let bob: String = String!("bob");
+    let charlie: String = String!("charlie");
 
     runtime.balances.set_balance(&alice, 100);
 
