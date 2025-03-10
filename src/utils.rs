@@ -7,10 +7,23 @@ use num::{
     Zero,
 };
 
+use crate::{
+    Runtime,
+    balances,
+    support,
+};
+
 pub type AccountId = String;
 pub type BlockNumber = u32;
 pub type Nonce = u32;
 pub type Balance = u128;
+pub type Extrinsic = support::Extrinsic<AccountId, RuntimeCall>;
+pub type Header = support::Header<BlockNumber>;
+pub type Block = support::Block<Header, Extrinsic>;
+
+pub enum RuntimeCall {
+    Balances(balances::Call<Runtime>),
+}
 
 pub trait AccountIdentifier {
     type AccountId: Ord + Clone + Debug;

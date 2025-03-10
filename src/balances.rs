@@ -11,27 +11,64 @@ use num::{
 
 use crate::{
     error_messages::*,
+    support,
     utils::BalancesConfig,
 };
 
+/// The `Pallet` struct represents a module for managing account balances.
+/// It uses a `BTreeMap` to store the balances of accounts, where the key
+/// is the account ID and the value is the balance associated with that
+/// account.
+///
+/// # Type Parameters
+///
+/// * `T` - A type that implements the `BalancesConfig` trait, which defines the
+///   associated types for `AccountId` and `Balance`.
+///
+/// # Fields
+///
+/// * `balances` - A `BTreeMap` that maps account IDs to their respective
+///   balances.
+///
+/// # Examples
+///
+/// ```
+/// use std::collections::BTreeMap;
+///
+/// use crate::{
+///     balances::Pallet,
+///     utils::BalancesConfig,
+/// };
+///
+/// struct TestConfig;
+///
+/// impl BalancesConfig for TestConfig {
+///     type AccountId = String;
+///     type Balance = u128;
+/// }
+///
+/// let mut balances: Pallet<TestConfig> = Pallet::new();
+/// balances.set_balance(&"Alice".to_string(), 100);
+/// assert_eq!(balances.get_balance(&"Alice".to_string()), 100);
+/// ```
 #[derive(Clone, Debug)]
 pub struct Pallet<T: BalancesConfig> {
     balances: BTreeMap<T::AccountId, T::Balance>,
 }
 
 impl<T: BalancesConfig> Pallet<T> {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self { balances: BTreeMap::new() }
-    }
-
-    pub fn set_balance(&mut self, who: &T::AccountId, amount: T::Balance) {
-        self.balances.insert(who.clone(), amount);
     }
 
     pub fn get_balance(&self, who: &T::AccountId) -> T::Balance {
         let balance =
-            self.balances.get(who).map(|f| *f).unwrap_or(T::Balance::zero());
+            self.balances.get(who).map_or_else(T::Balance::zero, |f| *f);
         balance
+    }
+
+    pub fn set_balance(&mut self, who: &T::AccountId, amount: T::Balance) {
+        self.balances.insert(who.clone(), amount);
     }
 
     /// Transfer `amount` from one account to another
@@ -56,6 +93,28 @@ impl<T: BalancesConfig> Pallet<T> {
         self.set_balance(&caller, new_caller_balance);
         self.set_balance(&to, new_to_ballance);
 
+        Ok(())
+    }
+}
+
+pub enum Call<T: BalancesConfig> {
+    Transfer { to: T::AccountId, amount: T::Balance },
+}
+
+impl<T: BalancesConfig> crate::support::Dispatch for Pallet<T> {
+    type Caller = T::AccountId;
+    type Call = Call<T>;
+
+    fn dispatch(
+        &mut self,
+        caller: Self::Caller,
+        call: Self::Call,
+    ) -> support::DispatchResult {
+        match call {
+            Call::Transfer { to, amount } => {
+                self.transfer(caller, to, amount)?;
+            }
+        }
         Ok(())
     }
 }

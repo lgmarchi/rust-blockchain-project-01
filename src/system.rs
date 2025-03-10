@@ -22,15 +22,15 @@ impl<T: SystemConfig> Pallet<T> {
         Self { block_number: T::BlockNumber::zero(), nonce: BTreeMap::new() }
     }
 
-    pub fn block_number(&self) -> T::BlockNumber {
+    pub const fn block_number(&self) -> T::BlockNumber {
         self.block_number
     }
 
     // This function can be used to increment the block number.
     // Increases the block number by one.
     pub fn increase_block_number(&mut self) {
-        if let Some(_) = self.block_number.checked_add(&T::BlockNumber::one()) {
-            self.block_number = self.block_number + T::BlockNumber::one()
+        if self.block_number.checked_add(&T::BlockNumber::one()).is_some() {
+            self.block_number = self.block_number + T::BlockNumber::one();
         }
     }
 
@@ -81,7 +81,7 @@ mod test {
     #[test]
     fn init_system() {
         let system: Pallet<TestConfig> = super::Pallet::new();
-        assert_eq!(system.block_number(), 0)
+        assert_eq!(system.block_number(), 0);
     }
 
     #[test]
