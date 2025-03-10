@@ -1,25 +1,30 @@
 use core::fmt::Debug;
 use std::collections::BTreeMap;
 
-use crate::{
-    support::{
-        self,
-        DispatchResult,
-    },
-    utils::PoeConfig,
+use crate::support::{
+    self,
+    DispatchResult,
 };
+
+pub trait Config: crate::utils::SystemConfig {
+    /// The type which represents the content that can be claimed using this
+    /// pallet. Could be the content directly as bytes, or better yet the
+    /// hash of that content. We leave that decision to the runtime
+    /// developer.
+    type Content: Debug + Ord;
+}
 
 /// This is the Proof of Existence Module.
 /// It is a simple module that allows accounts to claim existence of some data.
 #[derive(Debug)]
-pub struct Pallet<T: PoeConfig> {
+pub struct Pallet<T: Config> {
     /// A simple storage map from content to the owner of that content.
     /// Accounts can make multiple different claims, but each claim can only
     /// have one owner.
     claims: BTreeMap<T::Content, T::AccountId>,
 }
 
-impl<T: PoeConfig> Pallet<T> {
+impl<T: Config> Pallet<T> {
     /// Create a new instance of the Proof of Existence Module.
     pub const fn new() -> Self {
         Self { claims: BTreeMap::new() }
@@ -28,7 +33,10 @@ impl<T: PoeConfig> Pallet<T> {
     pub fn get_claim(&self, claim: &T::Content) -> Option<&T::AccountId> {
         self.claims.get(claim)
     }
+}
 
+#[macros::call]
+impl<T: Config> Pallet<T> {
     pub fn create_claim(
         &mut self,
         caller: T::AccountId,
@@ -60,39 +68,13 @@ impl<T: PoeConfig> Pallet<T> {
     }
 }
 
-pub enum Call<T: PoeConfig> {
-    CreateClaim { claim: T::Content },
-    RevokeClaim { claim: T::Content },
-}
-
-impl<T: PoeConfig> crate::support::Dispatch for Pallet<T> {
-    type Caller = T::AccountId;
-    type Call = Call<T>;
-
-    fn dispatch(
-        &mut self,
-        caller: Self::Caller,
-        call: Self::Call,
-    ) -> support::DispatchResult {
-        match call {
-            Call::CreateClaim { claim } => {
-                self.create_claim(caller, claim)?;
-            }
-            Call::RevokeClaim { claim } => {
-                self.revoke_claim(caller, claim)?;
-            }
-        }
-        Ok(())
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use crate::utils::AccountIdentifier;
 
     struct TestConfig;
 
-    impl super::PoeConfig for TestConfig {
+    impl super::Config for TestConfig {
         type Content = &'static str;
     }
 

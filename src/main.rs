@@ -14,7 +14,6 @@ use utils::{
     BlockNumber,
     Content,
     Nonce,
-    PoeConfig,
     RuntimeCall,
     SystemConfig,
 };
@@ -47,7 +46,7 @@ impl balances::Config for Runtime {
     type Balance = Balance;
 }
 
-impl PoeConfig for Runtime {
+impl proof_of_existence::Config for Runtime {
     type Content = Content;
 }
 
@@ -136,7 +135,7 @@ fn main() {
             support::Extrinsic {
                 caller: lucas.clone(),
                 call: RuntimeCall::ProofOfExistence(
-                    proof_of_existence::Call::CreateClaim {
+                    proof_of_existence::Call::create_claim {
                         claim: "lucas_document",
                     },
                 ),
@@ -144,7 +143,7 @@ fn main() {
             support::Extrinsic {
                 caller: matheus.clone(),
                 call: RuntimeCall::ProofOfExistence(
-                    proof_of_existence::Call::CreateClaim {
+                    proof_of_existence::Call::create_claim {
                         claim: "matheus_document",
                     },
                 ),
