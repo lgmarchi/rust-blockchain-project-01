@@ -94,51 +94,15 @@ impl crate::support::Dispatch for Runtime {
 
 fn main() {
     let mut runtime = Runtime::new();
-    let alice: String = String!("alice");
-    let bob: String = String!("bob");
-    let charlie: String = String!("charlie");
+    let lucas: String = String!("Lucas");
+    let matheus: String = String!("Matheus");
+    let marcos: String = String!("Marcos");
 
-    runtime.balances.set_balance(&alice, 100);
+    runtime.balances.set_balance(&lucas, 100);
 
-    let block_1 = support::Block {
-        header: support::Header { block_number: 1 },
-        extrinsics: vec![
-            support::Extrinsic {
-                caller: alice.clone(),
-                call: RuntimeCall::Balances(balances::Call::Transfer {
-                    to: bob.clone(),
-                    amount: 30,
-                }),
-            },
-            support::Extrinsic {
-                caller: alice.clone(),
-                call: RuntimeCall::Balances(balances::Call::Transfer {
-                    to: charlie.clone(),
-                    amount: 20,
-                }),
-            },
-        ],
-    };
+    let block_1 = create_block!(1, (lucas, matheus, 30), (lucas, marcos, 20));
 
-    let block_2 = support::Block {
-        header: support::Header { block_number: 2 },
-        extrinsics: vec![
-            support::Extrinsic {
-                caller: alice.clone(),
-                call: RuntimeCall::Balances(balances::Call::Transfer {
-                    to: bob,
-                    amount: 30,
-                }),
-            },
-            support::Extrinsic {
-                caller: alice,
-                call: RuntimeCall::Balances(balances::Call::Transfer {
-                    to: charlie,
-                    amount: 20,
-                }),
-            },
-        ],
-    };
+    let block_2 = create_block!(2, (lucas, matheus, 30), (lucas, marcos, 20));
 
     runtime.execute_block(block_1).expect("Wrong block execution!");
     runtime.execute_block(block_2).expect("Wrong block execution!");
