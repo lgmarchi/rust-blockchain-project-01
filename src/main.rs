@@ -13,14 +13,17 @@ use utils::{
     Balance,
     BalancesConfig,
     BlockNumber,
+    Content,
     Nonce,
+    PoeConfig,
     RuntimeCall,
     SystemConfig,
 };
 
 mod balances;
-mod declarative_marcros;
+mod declarative_macros;
 mod error_messages;
+mod proof_of_existence;
 mod support;
 mod system;
 mod utils;
@@ -29,6 +32,7 @@ mod utils;
 pub struct Runtime {
     system: system::Pallet<Runtime>,
     balances: balances::Pallet<Runtime>,
+    proof_of_existence: proof_of_existence::Pallet<Runtime>,
 }
 
 impl AccountIdentifier for Runtime {
@@ -44,11 +48,16 @@ impl BalancesConfig for Runtime {
     type Balance = Balance;
 }
 
+impl PoeConfig for Runtime {
+    type Content = Content;
+}
+
 impl Runtime {
     fn new() -> Self {
         Self {
             system: system::Pallet::new(),
             balances: balances::Pallet::new(),
+            proof_of_existence: proof_of_existence::Pallet::new(),
         }
     }
 
@@ -87,6 +96,9 @@ impl crate::support::Dispatch for Runtime {
             RuntimeCall::Balances(call) => {
                 self.balances.dispatch(caller, call)?;
             }
+            RuntimeCall::ProofOfExistence(call) => {
+                self.proof_of_existence.dispatch(caller, call)?;
+            }
         }
         Ok(())
     }
@@ -99,10 +111,47 @@ fn main() {
     let marcos: String = String!("Marcos");
 
     runtime.balances.set_balance(&lucas, 100);
+    let block_1 = support::Block {
+        header: support::Header { block_number: 1 },
+        extrinsics: vec![
+            support::Extrinsic {
+                caller: lucas.clone(),
+                call: RuntimeCall::Balances(balances::Call::Transfer {
+                    to: matheus.clone(),
+                    amount: 30,
+                }),
+            },
+            support::Extrinsic {
+                caller: lucas.clone(),
+                call: RuntimeCall::Balances(balances::Call::Transfer {
+                    to: marcos.clone(),
+                    amount: 20,
+                }),
+            },
+        ],
+    };
 
-    let block_1 = create_block!(1, (lucas, matheus, 30), (lucas, marcos, 20));
-
-    let block_2 = create_block!(2, (lucas, matheus, 30), (lucas, marcos, 20));
+    let block_2 = support::Block {
+        header: support::Header { block_number: 2 },
+        extrinsics: vec![
+            support::Extrinsic {
+                caller: lucas.clone(),
+                call: RuntimeCall::ProofOfExistence(
+                    proof_of_existence::Call::CreateClaim {
+                        claim: "lucas_document",
+                    },
+                ),
+            },
+            support::Extrinsic {
+                caller: matheus.clone(),
+                call: RuntimeCall::ProofOfExistence(
+                    proof_of_existence::Call::CreateClaim {
+                        claim: "matheus_document",
+                    },
+                ),
+            },
+        ],
+    };
 
     runtime.execute_block(block_1).expect("Wrong block execution!");
     runtime.execute_block(block_2).expect("Wrong block execution!");
