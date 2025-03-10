@@ -21,7 +21,7 @@ pub struct Pallet<T: PoeConfig> {
 
 impl<T: PoeConfig> Pallet<T> {
     /// Create a new instance of the Proof of Existence Module.
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self { claims: BTreeMap::new() }
     }
 

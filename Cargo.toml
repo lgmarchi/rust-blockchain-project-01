@@ -2,7 +2,9 @@
 name = "rust-blockchain-project-01"
 version = "0.1.0"
 edition = "2024"
+description = "Blockchain project with proof of existence"
 
 [dependencies]
 lazy_static = "1.5.0"
 num = "0.4.3"
+macros = { path = "./macros" }
