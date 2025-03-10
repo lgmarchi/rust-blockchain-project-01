@@ -1,7 +1,10 @@
 use core::fmt::Debug;
 use std::collections::BTreeMap;
 
-use crate::support::DispatchResult;
+use crate::support::{
+    self,
+    DispatchResult,
+};
 
 pub trait Config: crate::utils::SystemConfig {
     /// The type which represents the content that can be claimed using this
@@ -58,6 +61,32 @@ impl<T: Config> Pallet<T> {
 
         self.claims.remove(&claim);
 
+        Ok(())
+    }
+}
+
+pub enum Call<T: Config> {
+    CreateClaim { claim: T::Content },
+    RevokeClaim { claim: T::Content },
+}
+
+impl<T: Config> crate::support::Dispatch for Pallet<T> {
+    type Caller = T::AccountId;
+    type Call = Call<T>;
+
+    fn dispatch(
+        &mut self,
+        caller: Self::Caller,
+        call: Self::Call,
+    ) -> support::DispatchResult {
+        match call {
+            Call::CreateClaim { claim } => {
+                self.create_claim(caller, claim)?;
+            }
+            Call::RevokeClaim { claim } => {
+                self.revoke_claim(caller, claim)?;
+            }
+        }
         Ok(())
     }
 }
