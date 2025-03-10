@@ -43,4 +43,21 @@ impl<T: Config> Pallet<T> {
             Ok(())
         }
     }
+
+    pub fn revoke_claim(
+        &mut self,
+        caller: T::AccountId,
+        claim: T::Content,
+    ) -> DispatchResult {
+        let claim_owner =
+            self.get_claim(&claim).ok_or("Claim doest not exist")?;
+
+        if claim_owner != &caller {
+            return Err("Caller is not the claim owner");
+        }
+
+        self.claims.remove(&claim);
+
+        Ok(())
+    }
 }
