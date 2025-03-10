@@ -53,11 +53,60 @@ impl<T: Config> Pallet<T> {
             self.get_claim(&claim).ok_or("Claim doest not exist")?;
 
         if claim_owner != &caller {
-            return Err("Caller is not the claim owner");
+            return Err("Caller is not the owner of the claim");
         }
 
         self.claims.remove(&claim);
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::utils::AccountIdentifier;
+
+    struct TestConfig;
+
+    impl super::Config for TestConfig {
+        type Content = &'static str;
+    }
+
+    impl AccountIdentifier for TestConfig {
+        type AccountId = String;
+    }
+
+    impl crate::utils::SystemConfig for TestConfig {
+        type BlockNumber = u32;
+        type Nonce = u32;
+    }
+
+    #[test]
+    fn basic_proof_of_existence() {
+        let mut proof_of_existence = super::Pallet::<TestConfig>::new();
+
+        let _ = proof_of_existence
+            .create_claim(String::from("Alice"), "my_documents");
+
+        assert_eq!(
+            proof_of_existence.get_claim(&"my_documents"),
+            Some(&String::from("Alice"))
+        );
+
+        let _ = proof_of_existence
+            .revoke_claim(String::from("Alice"), "my_documents");
+        assert_eq!(proof_of_existence.get_claim(&"my_documents"), None);
+
+        let _ = proof_of_existence
+            .create_claim(String::from("Bob"), "my_documents");
+
+        let res = proof_of_existence
+            .create_claim(String::from("Charlie"), "my_documents");
+
+        assert_eq!(res, Err("Claim already exist."));
+
+        let res02 = proof_of_existence
+            .revoke_claim(String::from("Alice"), "my_documents");
+        assert_eq!(res02, Err("Caller is not the owner of the claim"));
     }
 }
