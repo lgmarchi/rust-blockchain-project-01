@@ -37,10 +37,6 @@ pub trait SystemConfig: AccountIdentifier {
     type Nonce: Ord + Clone + Copy + One + Zero + std::ops::AddAssign + Debug;
 }
 
-pub trait BalancesConfig: AccountIdentifier {
-    type Balance: Zero + CheckedSub + CheckedAdd + Copy + Debug;
-}
-
 pub trait PoeConfig: crate::utils::SystemConfig {
     /// The type which represents the content that can be claimed using this
     /// pallet. Could be the content directly as bytes, or better yet the

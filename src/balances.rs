@@ -9,10 +9,13 @@ use num::{
     Zero,
 };
 
+pub trait Config: AccountIdentifier {
+    type Balance: Zero + CheckedSub + CheckedAdd + Copy + Debug;
+}
+
 use crate::{
     error_messages::*,
-    support,
-    utils::BalancesConfig,
+    utils::AccountIdentifier,
 };
 
 /// The `Pallet` struct represents a module for managing account balances.
@@ -52,11 +55,11 @@ use crate::{
 /// assert_eq!(balances.get_balance(&"Alice".to_string()), 100);
 /// ```
 #[derive(Clone, Debug)]
-pub struct Pallet<T: BalancesConfig> {
+pub struct Pallet<T: Config> {
     balances: BTreeMap<T::AccountId, T::Balance>,
 }
 
-impl<T: BalancesConfig> Pallet<T> {
+impl<T: Config> Pallet<T> {
     pub const fn new() -> Self {
         Self { balances: BTreeMap::new() }
     }
@@ -70,7 +73,10 @@ impl<T: BalancesConfig> Pallet<T> {
     pub fn set_balance(&mut self, who: &T::AccountId, amount: T::Balance) {
         self.balances.insert(who.clone(), amount);
     }
+}
 
+#[macros::call]
+impl<T: Config> Pallet<T> {
     /// Transfer `amount` from one account to another
     /// This function verifies that `from` has at least `amount` balance to
     /// transfer and that no mathematical overflows occur.
@@ -97,31 +103,9 @@ impl<T: BalancesConfig> Pallet<T> {
     }
 }
 
-pub enum Call<T: BalancesConfig> {
-    Transfer { to: T::AccountId, amount: T::Balance },
-}
-
-impl<T: BalancesConfig> crate::support::Dispatch for Pallet<T> {
-    type Caller = T::AccountId;
-    type Call = Call<T>;
-
-    fn dispatch(
-        &mut self,
-        caller: Self::Caller,
-        call: Self::Call,
-    ) -> support::DispatchResult {
-        match call {
-            Call::Transfer { to, amount } => {
-                self.transfer(caller, to, amount)?;
-            }
-        }
-        Ok(())
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::BalancesConfig;
+    use super::Config;
     use crate::{
         balances::Pallet,
         utils::{
@@ -139,7 +123,7 @@ mod tests {
         type AccountId = String;
     }
 
-    impl BalancesConfig for TestConfig {
+    impl Config for TestConfig {
         type Balance = u128;
     }
 

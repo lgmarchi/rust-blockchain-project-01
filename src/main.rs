@@ -11,7 +11,6 @@ use utils::{
     AccountId,
     AccountIdentifier,
     Balance,
-    BalancesConfig,
     BlockNumber,
     Content,
     Nonce,
@@ -44,7 +43,7 @@ impl SystemConfig for Runtime {
     type Nonce = Nonce;
 }
 
-impl BalancesConfig for Runtime {
+impl balances::Config for Runtime {
     type Balance = Balance;
 }
 
@@ -116,14 +115,14 @@ fn main() {
         extrinsics: vec![
             support::Extrinsic {
                 caller: lucas.clone(),
-                call: RuntimeCall::Balances(balances::Call::Transfer {
+                call: RuntimeCall::Balances(balances::Call::transfer {
                     to: matheus.clone(),
                     amount: 30,
                 }),
             },
             support::Extrinsic {
                 caller: lucas.clone(),
-                call: RuntimeCall::Balances(balances::Call::Transfer {
+                call: RuntimeCall::Balances(balances::Call::transfer {
                     to: marcos.clone(),
                     amount: 20,
                 }),
