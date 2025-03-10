@@ -21,6 +21,7 @@ use utils::{
 mod balances;
 mod declarative_marcros;
 mod error_messages;
+mod proof_of_existence;
 mod support;
 mod system;
 mod utils;
